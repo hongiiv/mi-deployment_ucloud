@@ -22,7 +22,8 @@ from fabric.colors import green, yellow, red
 CDN_ROOT_URL = "http://userwww.service.emory.edu/~eafgan/content"
 
 # -- General environment setup
-env.user = 'ubuntu'
+#env.user = 'ubuntu'
+env.user = 'root'
 env.use_sudo = True
 env.cloud = False # Flag to indicate if running on a cloud deployment
 
@@ -36,9 +37,11 @@ def _amazon_ec2_environment():
     Typically, this would assume starting an EC2 instance, attaching an EBS
     volume to it, creating a file system on it, and mounting it at below paths.
     """
-    env.user = 'ubuntu'
-    env.galaxy_user = 'galaxy'
-    env.install_dir = '/mnt/galaxyTools/tools' # Install all tools under this dir
+    #env.user = 'ubuntu'
+    #env.galaxy_user = 'galaxy'
+    env.user = 'root'
+    env.galaxy_user = 'root'
+	env.install_dir = '/mnt/galaxyTools/tools' # Install all tools under this dir
     env.galaxy_home = '/mnt/galaxyTools/galaxy-central' # Where Galaxy is/will be installed
     env.galaxy_loc_files = '/mnt/galaxyIndices/galaxy/galaxy-data' # Where Galaxy's .loc files are stored
     env.update_default = True # If True, set the tool's `default` directory to point to the tool version currently being installed
@@ -136,6 +139,10 @@ def _install_galaxy():
     # MP: we need to have a tmp directory available if files already exist in the galaxy install directory
     install_cmd = sudo if env.use_sudo else run
     tmp_dir = os.path.join(env.tmp_dir, "fab_tmp")
+
+	if not exists(env.galaxy_loc_files):
+		sudo("mkdir -p %s" % env.galaxy_loc_files)
+	    sudo("chown %s %s" % (env.galaxy_loc_files, os.path.split(env.install_dir)[0]))	
     if exists(tmp_dir):
         install_cmd("rm -rf %s" % tmp_dir)
     if exists(env.galaxy_home):
